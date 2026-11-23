@@ -20,7 +20,8 @@ env:
   noop_max: 30          # 0..30 bước NOOP ngẫu nhiên đầu mỗi lượt khi huấn luyện
   normalize_reward: true
 
-model: {}               # tham số thêm cho ActorCritic(...) nếu nhóm cần
+model:                  # tham số thêm cho ActorCritic(...)
+  arch: nature          # nature | impala (xem mario_ppo/model.py)
 
 algo:
   num_envs: 16
