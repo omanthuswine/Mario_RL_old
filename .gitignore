@@ -1,0 +1,19 @@
+# Kết quả huấn luyện (checkpoint, video, csv): chia sẻ qua Drive, xem phan-cong.md quy tắc 6
+runs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Môi trường ảo
+.venv/
+venv/
+
+# IDE, hệ điều hành
+.vscode/
+.idea/
+.ipynb_checkpoints/
+Thumbs.db
+.DS_Store
