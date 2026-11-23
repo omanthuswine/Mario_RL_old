@@ -5,7 +5,7 @@
 | Mã | Họ tên | Máy (CPU / số lõi / GPU) | sps đo được | Vai trò chính |
 |---|---|---|---|---|
 | TV1 | Quốc Anh | | | Môi trường: wrapper, mẹo huấn luyện, `env.py`, trình chiếu |
-| TV2 | Công Kiên | | | **Điều phối nhóm**. Mạng và vòng huấn luyện: `model.py`, `train.py`, tích hợp, hình vẽ, ghép báo cáo |
+| TV2 | Công Kiên | Ryzen 7 7435HS / 8 lõi, 16 luồng / RTX 4050 Laptop 6 GB; RAM 16 GB; Windows 11 | (đo sau tích hợp; trần giả lập ~580) | **Điều phối nhóm**. Mạng và vòng huấn luyện: `model.py`, `train.py`, tích hợp, hình vẽ, ghép báo cáo |
 | TV3 | Hải Đăng | | | GAE, đánh giá nhiều seed, chọn và huấn luyện màn thưởng, phân tích thất bại |
 | TV4 | Trường | | | Mất mát PPO và vòng cập nhật, đánh giá cuối, đóng gói bài nộp |
 
