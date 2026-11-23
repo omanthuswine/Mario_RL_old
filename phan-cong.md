@@ -55,7 +55,7 @@
 5. **Ngân sách màn thưởng tối đa 10 triệu bước.**
    - Khi học chuyển giao, dùng `init_from=<checkpoint 1-1>`, **không dùng `resume=`**. Với `init_from`, số bước đếm lại từ 0 và lịch lr, lịch entropy chạy lại từ đầu. Với `resume`, số bước nối tiếp từ checkpoint 1-1, lr bắt đầu đã bị giảm, và ngân sách khó giải trình.
    - Đặt `algo.total_steps` ≤ 10 triệu ngay từ đầu, và ghi trong báo cáo số bước 1-1 đã dùng để khởi tạo.
-   - TV2 hỏi giảng viên: số bước 1-1 dùng để khởi tạo có bị tính vào 10 triệu không.
+   - Theo đề Mục 3.3, 10 triệu bước là ngân sách huấn luyện trên chính màn thưởng. Khởi tạo từ checkpoint 1-1 của nhóm được phép, chỉ cần nêu rõ trong báo cáo.
 6. **Báo cáo (25 điểm) là phần chắc ăn nhất sau A**, chỉ cần đủ mục và đúng yêu cầu:
    - mục 1 có bảng `pytest` và các lỗi đã gặp;
    - mục 2 có bảng cấu hình của mỗi màn, phần cứng, số bước, thời gian, sps;
