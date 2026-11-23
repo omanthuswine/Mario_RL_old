@@ -4,6 +4,7 @@ seed: 1
 device: auto            # auto | cpu | cuda
 run_dir: null           # mặc định runs/<level>/<thời điểm>
 resume: null            # checkpoint .pt để chạy tiếp (trọng số + optimizer + số bước)
+init_from: null         # checkpoint .pt để học chuyển giao: chỉ nạp trọng số, số bước bắt đầu từ 0
 torch_threads: 2        # số luồng CPU của torch trong tiến trình huấn luyện
 checkpoint_every: 500_000
 eval_episodes: 5        # lượt đánh giá ở mỗi checkpoint (0 = tắt)
@@ -37,6 +38,7 @@ algo:
   clip_vloss: false
   norm_adv: true
   ent_coef: 0.01
+  ent_coef_end: null    # null = giữ cố định; số thực = giảm tuyến tính từ ent_coef về giá trị này
   vf_coef: 0.25
   max_grad_norm: 0.5
   target_kl: null

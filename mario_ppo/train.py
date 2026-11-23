@@ -4,6 +4,13 @@
     python -m mario_ppo.train level=1-4 algo.total_steps=8000000 # ghi đè bất kỳ khóa nào
     python -m mario_ppo.train --config configs/my.yaml seed=2
     python -m mario_ppo.train resume=runs/1-1/<run>/checkpoints/step_002000000.pt
+    python -m mario_ppo.train level=1-2 init_from=runs/1-1/<run>/checkpoints/step_003000000.pt  # học chuyển giao
+    python -m mario_ppo.train algo.ent_coef_end=0.0005   # hệ số entropy giảm tuyến tính 0.01 -> 0.0005
+
+resume: chạy tiếp đúng lần chạy cũ (trọng số + optimizer + số bước); nên giữ cùng run_dir để nhật ký liền mạch.
+init_from: bắt đầu lần chạy mới từ trọng số của checkpoint (optimizer mới, số bước, lịch lr và entropy từ 0),
+  để số bước của màn mới đếm đúng ngân sách. Nếu có cả hai thì resume được ưu tiên.
+--config thay hẳn default.yaml (không gộp), nên tệp cấu hình riêng phải đủ mọi khóa.
 
 Kết quả trong run_dir (mặc định runs/<level>/<thời điểm>):
   config.yaml, progress.csv (một dòng mỗi lần cập nhật), evals.csv, checkpoints/step_*.pt, videos/step_*.mp4
@@ -59,6 +66,20 @@ def _device(name):
     return torch.device(name)
 
 
+def _ent_coef(start, end, step, total):
+    """Hệ số entropy ở bước `step`: giảm tuyến tính từ `start` về `end` (end None = giữ cố định)."""
+    if end is None:
+        return start
+    return end + (start - end) * max(0.0, 1.0 - step / total)
+
+
+def _load_weights(model, path, device):
+    """Học chuyển giao: chỉ nạp trọng số mạng từ checkpoint, không nạp optimizer và số bước."""
+    import torch
+    ck = torch.load(path, map_location=device, weights_only=False)
+    model.load_state_dict(ck["model"])
+
+
 def train(cfg):
     """Huấn luyện theo cấu hình OmegaConf `cfg`; trả đường dẫn run_dir."""
     import torch
@@ -92,6 +113,9 @@ def train(cfg):
         opt.load_state_dict(ck["optimizer"])
         global_step = ck["global_step"]
         print(f"resumed from {cfg.resume} at step {global_step}")
+    elif cfg.get("init_from"):
+        _load_weights(model, cfg.init_from, device)
+        print(f"initialized weights from {cfg.init_from}; step counter starts at 0")
 
     progress, evals = _CSV(run / "progress.csv"), _CSV(run / "evals.csv")
     envs = _make_vec_env(env_cfg, cfg.level, a.num_envs, cfg.seed)
@@ -102,6 +126,7 @@ def train(cfg):
     b_logp, b_val, b_rew, b_term, b_trunc, b_final = (torch.zeros((T, N)) for _ in range(6))
     recent = deque(maxlen=100)  # (lợi tức thô, độ dài, x_pos, chạm cờ) của 100 lượt gần nhất
     next_ckpt = (global_step // cfg.checkpoint_every + 1) * cfg.checkpoint_every
+    ent_start, ent_end = a.ent_coef, a.get("ent_coef_end")
 
     def checkpoint():
         tag = f"step_{global_step:09d}"
@@ -126,6 +151,7 @@ def train(cfg):
             lr = linear_schedule(a.lr, global_step, a.total_steps) if a.anneal_lr else a.lr
             for g in opt.param_groups:
                 g["lr"] = lr
+            a.ent_coef = _ent_coef(ent_start, ent_end, global_step, a.total_steps)  # ppo_update đọc lại mỗi lần gọi
 
             # ---- thu một đoạn T bước trên N môi trường ----
             model.eval()
@@ -164,7 +190,7 @@ def train(cfg):
             # ---- ghi nhật ký ----
             sps = (global_step - step_start) / (time.perf_counter() - t_start)
             ep = np.array(recent, dtype=float) if recent else np.full((1, 4), np.nan)
-            row = {"global_step": global_step, "sps": round(sps, 1), "lr": lr,
+            row = {"global_step": global_step, "sps": round(sps, 1), "lr": lr, "ent_coef": round(float(a.ent_coef), 6),
                    **{k: round(float(v), 5) for k, v in stats.items()},
                    "episodes": len(recent), "ep_return": round(float(ep[:, 0].mean()), 3),
                    "ep_length": round(float(ep[:, 1].mean()), 1), "x_pos": round(float(ep[:, 2].mean()), 1),

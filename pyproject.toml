@@ -11,6 +11,7 @@ dependencies = [
     "torch",
     "omegaconf>=2.3",
     "imageio[ffmpeg]",
+    "matplotlib",  # scripts/plot_*.py vẽ hình cho báo cáo
     "pytest",
 ]
 
