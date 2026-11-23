@@ -141,7 +141,7 @@ Người duyệt phải giải thích lại được phần mình đã duyệt. 
 
 | Người | Việc | Bài kiểm tra / kết quả |
 |---|---|---|
-| Cả nhóm | Cài môi trường trên máy mình (README); ghi cấu hình máy vào bảng đầu tệp. **Máy Windows**: dùng WSL2 (Ubuntu) hoặc Colab, vì `train.py` dùng `AsyncVectorEnv(context="forkserver")`, chế độ này không có trên Windows, nên chạy với `num_envs > 1` sẽ lỗi | `pytest -q` chạy được (lúc đầu lỗi NotImplementedError là bình thường) |
+| Cả nhóm | Cài môi trường trên máy mình (README); ghi cấu hình máy vào bảng đầu tệp. **Máy Windows**: không cần WSL, không cần Visual Studio. Dùng `tools/wheels/nes_py-8.2.1-py3-none-win_amd64.whl` (cách dựng: `tools/build_nes_py_windows.py`). Lệnh cài, chạy trong thư mục dự án: `python -m venv .venv`, rồi `.venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cpu`, rồi `.venv\Scripts\python -m pip install tools/wheels/nes_py-8.2.1-py3-none-win_amd64.whl`, rồi `.venv\Scripts\python -m pip install -e .`. Muốn gỡ thì chỉ cần xóa thư mục `.venv`. `train.py` tự dùng `spawn` trên Windows (nhánh `tv2/train`), vì `forkserver` không có trên Windows | `pytest -q` chạy được (lúc đầu lỗi NotImplementedError là bình thường) |
 | TV1 | `FrameSkip`, `GrayResize`, `ScalarizeReward` | `tests/test_wrappers.py` (6 điểm) |
 | TV1 | **Bắt buộc xong trước cuối tuần**: `FlagBonus`, `NoProgressTruncation`, `StickyAction` cùng các khóa ở mục 2 | Kiểm tra nhỏ: bật hoặc tắt khóa thì hành vi đúng như mô tả |
 | TV2 | `ActorCritic.__init__`, `forward`: khởi tạo trực giao (gain √2 cho tầng ẩn, 0.01 cho đầu policy, 1 cho đầu value), chia ảnh cho 255 | `tests/test_model.py` (6 điểm). **Xong**, nhánh `tv2/model`, chờ TV1 duyệt |
