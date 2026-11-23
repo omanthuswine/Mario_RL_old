@@ -18,6 +18,7 @@ Kết quả trong run_dir (mặc định runs/<level>/<thời điểm>):
 import argparse
 import csv
 import functools
+import sys
 import time
 from collections import deque
 from datetime import datetime
@@ -27,7 +28,7 @@ import gymnasium as gym
 import numpy as np
 from omegaconf import OmegaConf
 
-# Không import torch ở mức module: các tiến trình môi trường (forkserver) nạp lại module chính,
+# Không import torch ở mức module: các tiến trình môi trường (forkserver, spawn) nạp lại module chính,
 # import torch ở đó tốn ~300 MB RAM cho mỗi trình giả lập.
 
 
@@ -37,7 +38,8 @@ def _make_vec_env(env_cfg, level, num_envs, seed):
     mode = gym.vector.AutoresetMode.SAME_STEP  # lượt mới bắt đầu ngay trong bước kết thúc; quan sát cuối ở info
     if num_envs == 1:
         return gym.vector.SyncVectorEnv(fns, autoreset_mode=mode)
-    return gym.vector.AsyncVectorEnv(fns, context="forkserver", autoreset_mode=mode)
+    context = "spawn" if sys.platform == "win32" else "forkserver"  # Windows không có forkserver
+    return gym.vector.AsyncVectorEnv(fns, context=context, autoreset_mode=mode)
 
 
 class _CSV:
